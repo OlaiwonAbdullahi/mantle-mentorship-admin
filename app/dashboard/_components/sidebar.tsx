@@ -6,6 +6,7 @@ import {
   IconCalendarBolt,
   IconMailSpark,
   IconReportMoney,
+  IconMailPause,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -37,6 +38,11 @@ const items = [
     title: "Contact Us",
     url: "/dashboard/contact",
     icon: IconMailSpark,
+  },
+  {
+    title: "Waitlists",
+    url: "/dashboard/waitlists",
+    icon: IconMailPause,
   },
 
   {

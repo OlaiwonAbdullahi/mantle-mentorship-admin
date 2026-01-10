@@ -285,30 +285,14 @@ const ProgramsPage = () => {
               <div className="p-6 flex-1 flex flex-col gap-4">
                 <div className="flex justify-between items-start gap-4">
                   <Badge
-                    variant={course.isPublished ? "default" : "secondary"}
+                    variant={"default"}
                     className={
-                      course.isPublished
-                        ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                        : ""
+                      "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
                     }
                   >
-                    {course.isPublished ? "Published" : "Draft"}
+                    Published
                   </Badge>
                   <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      onClick={() =>
-                        handleTogglePublish(course._id, course.isPublished)
-                      }
-                    >
-                      {course.isPublished ? (
-                        <IconEye size={16} />
-                      ) : (
-                        <IconEyeOff size={16} />
-                      )}
-                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"

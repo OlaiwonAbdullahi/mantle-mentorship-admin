@@ -48,7 +48,7 @@ const Navbar = ({ userName = "John" }: NavbarProps) => {
   }, []);
 
   return (
-    <nav className="bg-[#008000] border-b border-neutral-700 px-6 py-5 sticky top-0 z-10">
+    <nav className="bg-[#008000] border-b border-neutral-700 z-20 px-6 py-5 sticky top-0 ">
       <div className="flex items-center justify-between gap-6">
         <SidebarTrigger
           className="lg:hidden p-2 hover:bg-emerald-500/10 cursor-pointer rounded-md text-gray-300  hover:text-emerald-500  transition-all"

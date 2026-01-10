@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 interface ContactMessage {
   _id: string;
@@ -47,6 +48,7 @@ const ContactPage = () => {
 
         if (response.ok) {
           const result = await response.json();
+          console.log(result);
           if (result.success && Array.isArray(result.data)) {
             setMessages(result.data);
           } else {
@@ -126,21 +128,34 @@ const ContactPage = () => {
           filteredMessages.map((msg) => (
             <div
               key={msg._id}
-              className="group relative bg-card hover:bg-accent/5 transition-all duration-300 border border-border/50 rounded-xl p-5 shadow-sm hover:shadow-md flex flex-col md:flex-row gap-5 items-start md:items-center"
+              className={`group relative transition-all duration-300 border rounded-xl p-5 shadow-sm hover:shadow-md flex flex-col md:flex-row gap-5 items-start md:items-center ${
+                !msg.isRead
+                  ? "bg-card border-l-4 border-l-[#008000] shadow-md"
+                  : "bg-card/50 hover:bg-card border-border/50 opacity-80 hover:opacity-100"
+              }`}
             >
-              <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-transparent hover:ring-emerald-500/50 transition-all">
-                <AvatarImage
-                  src={`https://api.dicebear.com/9.x/glass/svg?seed=${msg?.name}`}
-                />
-                <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-600 text-white font-semibold">
-                  {msg?.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-transparent hover:ring-emerald-500/50 transition-all">
+                  <AvatarImage
+                    src={`https://api.dicebear.com/9.x/glass/svg?seed=${msg?.name}`}
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold">
+                    {msg?.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {!msg.isRead && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-card rounded-full animate-pulse" />
+                )}
+              </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-12 gap-4 w-full">
                 <div className="md:col-span-3">
-                  <h3 className="font-semibold text-foreground truncate font-sora">
+                  <h3
+                    className={`text-foreground truncate font-sora ${
+                      !msg.isRead ? "font-bold" : "font-medium"
+                    }`}
+                  >
                     {msg.name}
                   </h3>
                   <p className="text-sm text-muted-foreground truncate font-nunito flex items-center gap-1.5 mt-0.5">
@@ -150,8 +165,15 @@ const ContactPage = () => {
                 </div>
 
                 <div className="md:col-span-7">
-                  <p className="text-muted-foreground text-sm line-clamp-2 font-nunito leading-relaxed">
-                    {msg.message.slice(0, 50) + "..."}
+                  <p
+                    className={`text-sm line-clamp-2 font-nunito leading-relaxed ${
+                      !msg.isRead
+                        ? "text-foreground font-medium"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {msg.message.slice(0, 50) +
+                      (msg.message.length > 50 ? "..." : "")}
                   </p>
                 </div>
 
@@ -190,8 +212,65 @@ const ContactPage = () => {
                         {msg.message}
                       </p>
                     </div>
-                    <div className="flex justify-end mt-4 text-xs text-muted-foreground">
-                      Received {new Date(msg.createdAt).toLocaleString()}
+                    <div className="flex justify-between items-center mt-4">
+                      <div className="flex items-center gap-2">
+                        {msg.isRead ? (
+                          <span className="text-xs px-2 py-1 bg-green-500/10 text-green-600 rounded-full font-medium border border-green-500/20">
+                            Read
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-1 bg-red-500/10 text-red-600 rounded-full font-medium border border-red-500/20">
+                            Unread
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(msg.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end mt-2">
+                      {!msg.isRead && (
+                        <Button
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                          onClick={async () => {
+                            const token = localStorage.getItem("admin_token");
+                            if (!token) return;
+
+                            try {
+                              const response = await fetch(
+                                `https://mentle-mentorship-backend.onrender.com/api/contact/messages/${msg._id}/read`,
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    Authorization: `Bearer ${token}`,
+                                  },
+                                }
+                              );
+
+                              if (response.ok) {
+                                toast.success("Message marked as read");
+                                setMessages((prev) =>
+                                  prev.map((m) =>
+                                    m._id === msg._id
+                                      ? { ...m, isRead: true }
+                                      : m
+                                  )
+                                );
+                              } else {
+                                toast.error("Failed to mark message as read");
+                              }
+                            } catch (error) {
+                              console.error(
+                                "Error marking message as read",
+                                error
+                              );
+                              toast.error("Something went wrong");
+                            }
+                          }}
+                        >
+                          Mark as read
+                        </Button>
+                      )}
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -219,8 +298,10 @@ const ContactPage = () => {
                         setMessages((prev) =>
                           prev.filter((m) => m._id !== msg._id)
                         );
+                        toast.success("Message deleted");
                       } else {
                         console.error("Failed to delete message");
+                        toast.error("Failed to delete message");
                       }
                     } catch (error) {
                       console.error("Error deleting message", error);
