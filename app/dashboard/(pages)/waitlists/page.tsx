@@ -126,7 +126,7 @@ const Page = () => {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9 border border-border/50">
                         <AvatarImage
-                          src={`https://api.dicebear.com/9.x/initials/svg?seed=${item.name}`}
+                          src={`https://api.dicebear.com/9.x/glass/svg?seed=${item.name}`}
                         />
                         <AvatarFallback className="bg-primary/10 text-primary">
                           {item.name.charAt(0).toUpperCase()}

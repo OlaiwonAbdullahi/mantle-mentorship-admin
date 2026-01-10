@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 interface NavbarProps {
   userName?: string;
@@ -50,14 +51,17 @@ const Navbar = ({ userName = "John" }: NavbarProps) => {
   return (
     <nav className="bg-[#008000] border-b border-neutral-700 z-20 px-6 py-5 sticky top-0 ">
       <div className="flex items-center justify-between gap-6">
-        <SidebarTrigger
-          className="lg:hidden p-2 hover:bg-emerald-500/10 cursor-pointer rounded-md text-gray-300  hover:text-emerald-500  transition-all"
-          size={"lg"}
-        />
+        <div className=" flex items-center gap-2 justify-between w-full">
+          <Image src="/mantleLogo.png" alt="logo" width={50} height={50} />
+          <div className=" rounded-full border">
+            <SidebarTrigger
+              className="lg:hidden p-2 hover:bg-emerald-500/10 cursor-pointer rounded-md text-gray-300  hover:text-emerald-500  transition-all"
+              size={"lg"}
+            />
+          </div>
+        </div>
 
-        <div className=""></div>
-
-        <div className="flex items-center gap-4">
+        <div className="hidden items-center gap-4 md:flex">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-transparent hover:ring-emerald-500/50 transition-all">
               <AvatarImage
