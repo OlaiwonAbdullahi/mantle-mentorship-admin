@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IconSearch, IconMail, IconTrash, IconEye } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,65 +12,84 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Mock Data
-const CONTACT_DATA = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    message:
-      "Hi, I'm interested in the mentorship program. Can you provide more details about the curriculum and the start dates?",
-    date: "2 hours ago",
-    avatarColor: "bg-blue-500",
-  },
-  {
-    id: 2,
-    name: "Sarah Smith",
-    email: "sarah.smith@design.co",
-    message:
-      "I is currently trying to access the student portal but I am getting a 403 error. Can you please check my account status?",
-    date: "1 day ago",
-    avatarColor: "bg-purple-500",
-  },
-  {
-    id: 3,
-    name: "Michael Brown",
-    email: "m.brown@tech.net",
-    message:
-      "Just wanted to say the new curriculum looks amazing! The dynamic animations section is exactly what I was looking for.",
-    date: "2 days ago",
-    avatarColor: "bg-emerald-500",
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    email: "emily.d@school.edu",
-    message:
-      "Is there a scholarship available for the upcoming cohort? I assume there is some financial aid process.",
-    date: "3 days ago",
-    avatarColor: "bg-orange-500",
-  },
-  {
-    id: 5,
-    name: "David Wilson",
-    email: "david.w@freemail.com",
-    message:
-      "I am trying to submit my assignment but the button is disabled. It might be a browser issue on my end but thought I'd report it.",
-    date: "1 week ago",
-    avatarColor: "bg-pink-500",
-  },
-];
+interface ContactMessage {
+  _id: string;
+  name: string;
+  email: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
 
 const ContactPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [messages, setMessages] = useState(CONTACT_DATA);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const token = localStorage.getItem("admin_token");
+        if (!token) return;
+
+        const response = await fetch(
+          "https://mentle-mentorship-backend.onrender.com/api/contact/messages",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && Array.isArray(result.data)) {
+            setMessages(result.data);
+          } else {
+            console.error("Unexpected response format:", result);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch messages", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, []);
 
   const filteredMessages = messages.filter(
     (msg) =>
-      msg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      msg.email.toLowerCase().includes(searchTerm.toLowerCase())
+      msg.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      msg.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.abs(now.getTime() - date.getTime()) / 36e5;
+
+    if (diffInHours < 24) {
+      if (diffInHours < 1) {
+        const diffInMinutes = Math.floor(
+          Math.abs(now.getTime() - date.getTime()) / 60000
+        );
+        return `${diffInMinutes} mins ago`;
+      }
+      return `${Math.floor(diffInHours)} hours ago`;
+    }
+    // If more than 24 hours, show date
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="p-6 md:p-10 space-y-8 bg-background min-h-screen animate-in fade-in duration-500">
@@ -99,21 +118,24 @@ const ContactPage = () => {
 
       {/* Messages List */}
       <div className="grid grid-cols-1 gap-4">
-        {filteredMessages.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-20 text-muted-foreground">
+            Loading messages...
+          </div>
+        ) : filteredMessages.length > 0 ? (
           filteredMessages.map((msg) => (
             <div
-              key={msg.id}
+              key={msg._id}
               className="group relative bg-card hover:bg-accent/5 transition-all duration-300 border border-border/50 rounded-xl p-5 shadow-sm hover:shadow-md flex flex-col md:flex-row gap-5 items-start md:items-center"
             >
-              {/* Avatar / Initials */}
-              <div
-                className={`w-12 h-12 rounded-full bg-[#008000] flex items-center justify-center text-white font-bold text-lg shadow-inner shrink-0`}
-              >
-                {msg.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </div>
+              <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-transparent hover:ring-emerald-500/50 transition-all">
+                <AvatarImage
+                  src={`https://api.dicebear.com/9.x/glass/svg?seed=${msg?.name}`}
+                />
+                <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-600 text-white font-semibold">
+                  {msg?.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
 
               {/* Content */}
               <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-12 gap-4 w-full">
@@ -129,12 +151,12 @@ const ContactPage = () => {
 
                 <div className="md:col-span-7">
                   <p className="text-muted-foreground text-sm line-clamp-2 font-nunito leading-relaxed">
-                    {msg.message}
+                    {msg.message.slice(0, 50) + "..."}
                   </p>
                 </div>
 
                 <div className="md:col-span-2 flex md:justify-end items-center gap-2 text-xs text-muted-foreground font-medium">
-                  {msg.date}
+                  {formatDate(msg.createdAt)}
                 </div>
               </div>
 
@@ -169,7 +191,7 @@ const ContactPage = () => {
                       </p>
                     </div>
                     <div className="flex justify-end mt-4 text-xs text-muted-foreground">
-                      Received {msg.date}
+                      Received {new Date(msg.createdAt).toLocaleString()}
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -178,10 +200,31 @@ const ContactPage = () => {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive rounded-full"
-                  onClick={() => {
-                    // In a real app, delete logic here
-                    const newMessages = messages.filter((m) => m.id !== msg.id);
-                    setMessages(newMessages);
+                  onClick={async () => {
+                    const token = localStorage.getItem("admin_token");
+                    if (!token) return;
+
+                    try {
+                      const response = await fetch(
+                        `https://mentle-mentorship-backend.onrender.com/api/contact/messages/${msg._id}`,
+                        {
+                          method: "DELETE",
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        }
+                      );
+
+                      if (response.ok) {
+                        setMessages((prev) =>
+                          prev.filter((m) => m._id !== msg._id)
+                        );
+                      } else {
+                        console.error("Failed to delete message");
+                      }
+                    } catch (error) {
+                      console.error("Error deleting message", error);
+                    }
                   }}
                 >
                   <IconTrash size={18} />
