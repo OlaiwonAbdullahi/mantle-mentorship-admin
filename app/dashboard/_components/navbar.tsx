@@ -60,7 +60,7 @@ const Navbar = ({ userName = "John" }: NavbarProps) => {
             />
           </div>
         </div>
-
+        <div className="hidden md:flex items-center gap-2"></div>
         <div className="hidden items-center gap-4 md:flex">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-transparent hover:ring-emerald-500/50 transition-all">
