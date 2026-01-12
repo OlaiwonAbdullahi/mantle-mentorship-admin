@@ -3,7 +3,7 @@ import RecentActivities from "./_components/recent-activities";
 
 const DashboardPage = () => {
   return (
-    <div className="p-6 md:p-10 space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-bold font-sora tracking-tight">
           Dashboard Overview
