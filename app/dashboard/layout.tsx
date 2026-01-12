@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <AdminSidebar />
       <div className="flex-1 flex flex-col w-full">
         {/* <Navbar /> */}
-        <div className=" flex items-center">
+        <div className=" flex items-center md:hidden">
           <div className="absolute top-4 left-4 z-20">
             {" "}
             <div className="bg-[#008000] w-fit rounded-full p-1.5 flex items-center justify-center">

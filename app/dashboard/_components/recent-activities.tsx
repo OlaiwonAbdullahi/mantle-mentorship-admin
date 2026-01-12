@@ -213,10 +213,10 @@ const RecentActivities = () => {
                     <p className="text-[10px] text-muted-foreground">Price</p>
                   </div>
                   <Badge
-                    variant={course.isPublished ? "default" : "secondary"}
-                    className="shrink-0"
+                    variant={"default"}
+                    className="shrink-0 bg-emerald-400/70 text-emerald-800"
                   >
-                    {course.isPublished ? "Published" : "Draft"}
+                    Published
                   </Badge>
                 </div>
               </div>

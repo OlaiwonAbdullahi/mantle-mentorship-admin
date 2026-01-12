@@ -112,7 +112,7 @@ const AdminSidebar = () => {
     <Sidebar className="border-r border-neutral-200 dark:border-neutral-800">
       <SidebarContent className="flex flex-col h-full bg-white dark:bg-neutral-950">
         <SidebarGroup className="px-0">
-          <SidebarHeader className="flex flex-row space-x-3 items-center px-4 py-6">
+          <SidebarHeader className="flex border-b border-neutral-100 flex-row space-x-3 items-center px-4 py-6">
             <div className="bg-[#008000] rounded-full p-1.5 flex items-center justify-center">
               <Image
                 src="/mantleLogo.png"
@@ -198,7 +198,7 @@ const AdminSidebar = () => {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-start gap-3 px-3 py-6 h-auto text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-colors rounded-lg group"
+                  className="w-full h-fit flex items-center justify-start gap-3 px-3 py-6 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-colors rounded-lg group"
                   tooltip="Logout"
                 >
                   <IconLogout

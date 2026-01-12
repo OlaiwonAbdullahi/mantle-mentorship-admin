@@ -56,6 +56,8 @@ const ProgramsPage = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [newBenefit, setNewBenefit] = useState("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<string | null>(null);
 
   const fetchCourses = async () => {
     try {
@@ -135,20 +137,16 @@ const ProgramsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this course? This action cannot be undone."
-      )
-    )
-      return;
+  const handleDelete = async () => {
+    if (!idToDelete) return;
 
     try {
+      setIsSubmitting(true);
       const token = localStorage.getItem("admin_token");
       if (!token) return;
 
       const response = await fetch(
-        `https://mentle-mentorship-backend.onrender.com/api/courses/${id}`,
+        `https://mentle-mentorship-backend.onrender.com/api/courses/${idToDelete}`,
         {
           method: "DELETE",
           headers: {
@@ -158,46 +156,16 @@ const ProgramsPage = () => {
       );
 
       if (response.ok) {
-        setCourses((prev) => prev.filter((c) => c._id !== id));
+        setCourses((prev) => prev.filter((c) => c._id !== idToDelete));
+        setIsDeleteDialogOpen(false);
+        setIdToDelete(null);
       } else {
         alert("Failed to delete course");
       }
     } catch (error) {
       console.error("Error deleting course", error);
-    }
-  };
-
-  const handleTogglePublish = async (
-    id: string,
-    currentStatus: boolean | undefined
-  ) => {
-    try {
-      const token = localStorage.getItem("admin_token");
-      if (!token) return;
-
-      const response = await fetch(
-        `https://mentle-mentorship-backend.onrender.com/api/courses/${id}/publish`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        setCourses((prev) =>
-          prev.map((c) =>
-            c._id === id ? { ...c, isPublished: !currentStatus } : c
-          )
-        );
-      } else {
-        // Fallback if the backend doesn't return the updated object or if we just want to optimistically update then revert on fail
-        // Ideally fetchCourses() or read response
-        fetchCourses();
-      }
-    } catch (error) {
-      console.error("Error toggling publish status", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -211,6 +179,11 @@ const ProgramsPage = () => {
     setCurrentCourse(course);
     setIsEditing(true);
     setIsDialogOpen(true);
+  };
+
+  const openDeleteDialog = (id: string) => {
+    setIdToDelete(id);
+    setIsDeleteDialogOpen(true);
   };
 
   const addBenefit = () => {
@@ -305,7 +278,7 @@ const ProgramsPage = () => {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDelete(course._id)}
+                      onClick={() => openDeleteDialog(course._id)}
                     >
                       <IconTrash size={16} />
                     </Button>
@@ -394,7 +367,7 @@ const ProgramsPage = () => {
               <label htmlFor="description" className="text-sm font-medium">
                 Description
               </label>
-              <textarea
+              <Textarea
                 id="description"
                 className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="Detailed description of the program..."
@@ -582,6 +555,42 @@ const ProgramsPage = () => {
                 : isEditing
                 ? "Update Program"
                 : "Create Program"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold sora text-destructive">
+              Delete Program
+            </DialogTitle>
+            <DialogDescription className="py-2">
+              Are you sure you want to delete this program? This action cannot
+              be undone and all associated data will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 ">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setIdToDelete(null);
+              }}
+              disabled={isSubmitting}
+              className="flex-1 sm:flex-none cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isSubmitting}
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 cursor-pointer"
+            >
+              {isSubmitting ? "Deleting..." : "Delete Program"}
             </Button>
           </DialogFooter>
         </DialogContent>
