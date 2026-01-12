@@ -31,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-        <main className="flex-1 overflow-auto p-6 md:p-10 md:pt-5 pt-20">
+        <main className="flex-1 overflow-auto p-6 md:p-14 md:pt-10 pt-20">
           {children}
         </main>
       </div>

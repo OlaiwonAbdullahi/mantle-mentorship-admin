@@ -94,7 +94,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="p-6 md:p-10 space-y-8 bg-background min-h-screen animate-in fade-in duration-500">
+    <div className="space-y-8 bg-background min-h-screen animate-in fade-in duration-500">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -139,7 +139,7 @@ const ContactPage = () => {
                   <AvatarImage
                     src={`https://api.dicebear.com/9.x/glass/svg?seed=${msg?.name}`}
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold">
+                  <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-600 text-white font-semibold">
                     {msg?.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
