@@ -105,6 +105,8 @@ const AdminSidebar = () => {
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_name");
     localStorage.removeItem("admin_data");
+    document.cookie =
+      "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/");
   };
 

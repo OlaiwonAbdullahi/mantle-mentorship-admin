@@ -39,6 +39,7 @@ export default function LoginPage() {
         if (data) {
           console.log(data.data.token);
           localStorage.setItem("admin_token", data.data.token);
+          document.cookie = `admin_token=${data.data.token}; path=/; max-age=86400; SameSite=Lax`;
 
           localStorage.setItem("admin_name", data.data.name);
           localStorage.setItem("admin_data", JSON.stringify(data.data));
