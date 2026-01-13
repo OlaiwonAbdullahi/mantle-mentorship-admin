@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Toaster />
+      <Toaster position="top-center" richColors />
       <body className={`nunito antialiased`}>{children}</body>
     </html>
   );

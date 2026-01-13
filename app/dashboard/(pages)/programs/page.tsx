@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface Course {
   _id: string;
@@ -121,7 +122,7 @@ const ProgramsPage = () => {
         resetForm();
       } else {
         const errorData = await response.json();
-        alert(
+        toast.error(
           `Failed to ${isEditing ? "update" : "create"} course: ${
             errorData.message || "Unknown error"
           }`
@@ -129,7 +130,7 @@ const ProgramsPage = () => {
       }
     } catch (error) {
       console.error("Error saving course", error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -158,10 +159,11 @@ const ProgramsPage = () => {
         setIsDeleteDialogOpen(false);
         setIdToDelete(null);
       } else {
-        alert("Failed to delete course");
+        toast.error("Failed to delete course");
       }
     } catch (error) {
       console.error("Error deleting course", error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

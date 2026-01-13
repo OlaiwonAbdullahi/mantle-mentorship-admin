@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,13 +45,16 @@ export default function LoginPage() {
           localStorage.setItem("admin_name", data.data.name);
           localStorage.setItem("admin_data", JSON.stringify(data.data));
         }
+        toast.success("Login successful");
         router.push("/dashboard");
       } else {
-        alert(data.message || "Login failed. Please check your credentials.");
+        toast.error(
+          data.message || "Login failed. Please check your credentials."
+        );
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
