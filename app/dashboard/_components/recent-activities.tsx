@@ -214,7 +214,7 @@ const RecentActivities = () => {
                   </div>
                   <Badge
                     variant={"default"}
-                    className="shrink-0 bg-emerald-400/70 text-emerald-800"
+                    className="shrink-0 bg-green-500/10 text-green-500 border border-green-500/20"
                   >
                     Published
                   </Badge>
