@@ -75,7 +75,6 @@ const ProgramsPage = () => {
 
       if (response.ok) {
         const result = await response.json();
-        // Adjust based on actual response structure, assuming standard {success, data} or direct array
         if (result.success && Array.isArray(result.data)) {
           setCourses(result.data);
         } else if (Array.isArray(result)) {
@@ -117,7 +116,8 @@ const ProgramsPage = () => {
       });
 
       if (response.ok) {
-        await fetchCourses(); // Refresh list
+        await fetchCourses();
+        toast.success("Program Edited Successfully");
         setIsDialogOpen(false);
         resetForm();
       } else {
@@ -156,6 +156,7 @@ const ProgramsPage = () => {
 
       if (response.ok) {
         setCourses((prev) => prev.filter((c) => c._id !== idToDelete));
+        toast.success("Course deleted successfully");
         setIsDeleteDialogOpen(false);
         setIdToDelete(null);
       } else {
