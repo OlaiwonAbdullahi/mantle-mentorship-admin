@@ -23,7 +23,7 @@ const Navbar = ({ userName = "John" }: NavbarProps) => {
         if (!token) return;
 
         const response = await fetch(
-          "https://mentle-mentorship-backend.onrender.com/api/auth/me",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/auth/me`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

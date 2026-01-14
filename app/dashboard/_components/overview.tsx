@@ -48,7 +48,7 @@ const Overview = () => {
         }
 
         const response = await fetch(
-          "https://mentle-mentorship-backend.onrender.com/api/dashboard/stats",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/stats`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

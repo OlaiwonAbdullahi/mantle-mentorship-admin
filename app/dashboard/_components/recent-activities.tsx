@@ -51,7 +51,7 @@ const RecentActivities = () => {
         if (!token) return;
 
         const response = await fetch(
-          "https://mentle-mentorship-backend.onrender.com/api/dashboard/recent-activities",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/recent-activities`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
