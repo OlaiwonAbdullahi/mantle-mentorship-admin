@@ -460,20 +460,40 @@ const SalesPage = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-border/50">
-                {selectedEnrollment.receiptUrl && (
-                  <Button className="flex-1 gap-2" asChild>
+              {/* Receipt Preview */}
+              {selectedEnrollment.receiptUrl && (
+                <div className="space-y-3 border-t border-border/50 pt-6">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <IconExternalLink size={18} className="text-primary" />
+                    Payment Receipt Proof
+                  </h4>
+                  <div className="relative w-full overflow-hidden rounded-xl border border-border/50 bg-muted/30">
+                    <img
+                      src={selectedEnrollment.receiptUrl}
+                      alt="Payment Receipt"
+                      className="w-full h-auto object-contain max-h-[400px]"
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full gap-2 text-muted-foreground hover:text-primary"
+                    asChild
+                  >
                     <a
                       href={selectedEnrollment.receiptUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <IconDownload size={18} />
-                      Download Receipt
+                      <IconExternalLink size={14} />
+                      Open Full Image in New Tab
                     </a>
                   </Button>
-                )}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-border/50">
                 {selectedEnrollment.status === "pending" && (
                   <Button
                     variant="outline"

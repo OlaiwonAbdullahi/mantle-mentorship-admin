@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   IconSchool,
-  IconMail,
   IconCreditCard,
   IconWallet,
   IconLoader,
@@ -27,10 +26,9 @@ interface DashboardStats {
     pending: number;
     failed: number;
   };
-  revenue: {
+  enrollments: {
     total: number;
-    byCourse: unknown[];
-    monthly: unknown[];
+    pending: number;
   };
 }
 
@@ -124,8 +122,7 @@ const Overview = () => {
     },
     {
       title: "Payments",
-      value: stats?.payments?.successful || 0,
-      subValue: `/ ${stats?.payments?.total || 0} total`,
+      value: stats?.payments?.total,
       icon: IconCreditCard,
       color: "text-amber-600 dark:text-amber-400",
       bg: "bg-amber-50 dark:bg-amber-500/10",
@@ -133,11 +130,9 @@ const Overview = () => {
       trend: "Successful",
     },
     {
-      title: "Revenue",
-      value: new Intl.NumberFormat("en-NG", {
-        style: "currency",
-        currency: "NGN",
-      }).format(stats?.revenue?.total || 0),
+      title: "Enrollments",
+      value: stats?.enrollments?.total || 0,
+      subValue: `${stats?.enrollments?.pending || 0} pending`,
       icon: IconWallet,
       color: "text-teal-600 dark:text-teal-400",
       bg: "bg-teal-50 dark:bg-teal-500/10",
