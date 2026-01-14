@@ -11,6 +11,7 @@ import {
   IconCalendar,
   IconCheck,
   IconX,
+  IconLoader,
 } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -243,7 +244,7 @@ const SalesPage = () => {
               <TableRow>
                 <TableCell colSpan={6} className="h-64 text-center">
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <IconLoader size={20} className="animate-spin" />
                     <p>Loading enrollments...</p>
                   </div>
                 </TableCell>
