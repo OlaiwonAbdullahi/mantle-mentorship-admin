@@ -48,7 +48,7 @@ const Overview = () => {
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/stats`,
+          `${process.env.NEXT_PUBLIC_API_URL}/dashboard/stats`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -65,7 +65,7 @@ const ProgramsPage = () => {
       if (!token) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/courses`,
+        `${process.env.NEXT_PUBLIC_API_URL}/courses`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -101,8 +101,8 @@ const ProgramsPage = () => {
       if (!token) return;
 
       const url = isEditing
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}/courses/${currentCourse._id}`
-        : `${process.env.NEXT_PUBLIC_BASE_URL}/courses`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/courses/${currentCourse._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/courses`;
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -145,7 +145,7 @@ const ProgramsPage = () => {
       if (!token) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/courses/${idToDelete}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/courses/${idToDelete}`,
         {
           method: "DELETE",
           headers: {

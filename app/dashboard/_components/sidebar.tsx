@@ -77,7 +77,7 @@ const AdminSidebar = () => {
         if (!token) return;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/auth/me`,
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

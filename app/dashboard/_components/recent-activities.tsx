@@ -51,7 +51,7 @@ const RecentActivities = () => {
         if (!token) return;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/recent-activities`,
+          `${process.env.NEXT_PUBLIC_API_URL}/dashboard/recent-activities`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

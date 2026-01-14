@@ -39,7 +39,7 @@ const Page = () => {
         if (!token) return;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/waitlist`,
+          `${process.env.NEXT_PUBLIC_API_URL}/waitlist`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -17,7 +17,7 @@ export default function LoginPage() {
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsLoading(true);
-
+    console.log(process.env.NEXT_PUBLIC_API_URL);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,

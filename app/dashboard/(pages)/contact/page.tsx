@@ -38,7 +38,7 @@ const ContactPage = () => {
         if (!token) return;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/contact/messages`,
+          `${process.env.NEXT_PUBLIC_API_URL}/contact/messages`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -238,7 +238,7 @@ const ContactPage = () => {
 
                             try {
                               const response = await fetch(
-                                `${process.env.NEXT_PUBLIC_BASE_URL}/contact/messages/${msg._id}/read`,
+                                `${process.env.NEXT_PUBLIC_API_URL}/contact/messages/${msg._id}/read`,
                                 {
                                   method: "PATCH",
                                   headers: {
@@ -285,7 +285,7 @@ const ContactPage = () => {
 
                     try {
                       const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_BASE_URL}/contact/messages/${msg._id}`,
+                        `${process.env.NEXT_PUBLIC_API_URL}/contact/messages/${msg._id}`,
                         {
                           method: "DELETE",
                           headers: {

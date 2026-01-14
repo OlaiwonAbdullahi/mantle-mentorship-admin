@@ -92,7 +92,7 @@ const SalesPage = () => {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/enrollments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/enrollments`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -123,7 +123,7 @@ const SalesPage = () => {
       if (!token) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/enrollments/${id}/status`,
+        `${process.env.NEXT_PUBLIC_API_URL}/enrollments/${id}/status`,
         {
           method: "PATCH",
           headers: {
