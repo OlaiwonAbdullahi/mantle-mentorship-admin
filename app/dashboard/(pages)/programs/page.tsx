@@ -27,6 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -41,7 +49,17 @@ interface Course {
   frequency: string;
   mode: string;
   benefits: string[];
-  isPublished?: boolean; // Inferred
+  isPublished?: boolean;
+}
+
+interface Schedule {
+  _id: string;
+  courseId: string;
+  title: string;
+  description: string;
+  week: number;
+  facilitator: string;
+  date: string;
 }
 
 const ProgramsPage = () => {
@@ -57,6 +75,21 @@ const ProgramsPage = () => {
   const [newBenefit, setNewBenefit] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
+
+  // Schedule management states
+  const [isScheduleSheetOpen, setIsScheduleSheetOpen] = useState(false);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [schedulesLoading, setSchedulesLoading] = useState(false);
+  const [currentSchedule, setCurrentSchedule] = useState<Partial<Schedule>>({});
+  const [isScheduleEditing, setIsScheduleEditing] = useState(false);
+  const [selectedCourseForSchedule, setSelectedCourseForSchedule] =
+    useState<string>("");
+  const [isScheduleSubmitting, setIsScheduleSubmitting] = useState(false);
+  const [isScheduleDeleteDialogOpen, setIsScheduleDeleteDialogOpen] =
+    useState(false);
+  const [scheduleIdToDelete, setScheduleIdToDelete] = useState<string | null>(
+    null
+  );
 
   const fetchCourses = async () => {
     try {
@@ -174,6 +207,154 @@ const ProgramsPage = () => {
     setCurrentCourse({ benefits: [] });
     setIsEditing(false);
     setNewBenefit("");
+  };
+
+  // Schedule Management Functions
+  const fetchSchedules = async (courseId: string) => {
+    try {
+      setSchedulesLoading(true);
+      const token = localStorage.getItem("admin_token");
+      if (!token) return;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/schedules/courses/${courseId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && Array.isArray(result.data)) {
+          setSchedules(result.data);
+        } else if (Array.isArray(result)) {
+          setSchedules(result);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch schedules", error);
+      toast.error("Failed to load schedules");
+    } finally {
+      setSchedulesLoading(false);
+    }
+  };
+
+  const handleCreateOrUpdateSchedule = async () => {
+    if (
+      !currentSchedule.title?.trim() ||
+      !currentSchedule.week ||
+      !currentSchedule.facilitator?.trim() ||
+      !currentSchedule.date
+    ) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setIsScheduleSubmitting(true);
+      const token = localStorage.getItem("admin_token");
+      if (!token) return;
+
+      const url = isScheduleEditing
+        ? `${process.env.NEXT_PUBLIC_API_URL}/schedules/${currentSchedule._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/schedules`;
+
+      const method = isScheduleEditing ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          courseId: selectedCourseForSchedule,
+          title: currentSchedule.title,
+          description: currentSchedule.description || "",
+          week: Number(currentSchedule.week),
+          facilitator: currentSchedule.facilitator,
+          date: currentSchedule.date,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchSchedules(selectedCourseForSchedule);
+        toast.success(
+          `Schedule ${isScheduleEditing ? "updated" : "created"} successfully`
+        );
+        resetScheduleForm();
+      } else {
+        const errorData = await response.json();
+        toast.error(
+          `Failed to ${isScheduleEditing ? "update" : "create"} schedule: ${
+            errorData.message || "Unknown error"
+          }`
+        );
+      }
+    } catch (error) {
+      console.error("Error saving schedule", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsScheduleSubmitting(false);
+    }
+  };
+
+  const handleDeleteSchedule = async () => {
+    if (!scheduleIdToDelete) return;
+
+    try {
+      setIsScheduleSubmitting(true);
+      const token = localStorage.getItem("admin_token");
+      if (!token) return;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/schedules/${scheduleIdToDelete}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        await fetchSchedules(selectedCourseForSchedule);
+        toast.success("Schedule deleted successfully");
+        setIsScheduleDeleteDialogOpen(false);
+        setScheduleIdToDelete(null);
+      } else {
+        toast.error("Failed to delete schedule");
+      }
+    } catch (error) {
+      console.error("Error deleting schedule", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsScheduleSubmitting(false);
+    }
+  };
+
+  const resetScheduleForm = () => {
+    setCurrentSchedule({});
+    setIsScheduleEditing(false);
+  };
+
+  const openScheduleSheet = (courseId: string) => {
+    setSelectedCourseForSchedule(courseId);
+    resetScheduleForm();
+    fetchSchedules(courseId);
+    setIsScheduleSheetOpen(true);
+  };
+
+  const openEditSchedule = (schedule: Schedule) => {
+    setCurrentSchedule(schedule);
+    setIsScheduleEditing(true);
+  };
+
+  const openDeleteScheduleDialog = (id: string) => {
+    setScheduleIdToDelete(id);
+    setIsScheduleDeleteDialogOpen(true);
   };
 
   const openEditDialog = (course: Course) => {
@@ -313,6 +494,15 @@ const ProgramsPage = () => {
                   <div className="font-medium text-right">
                     €{course.price_in_euro?.toLocaleString()}
                   </div>
+                </div>
+                <div className="mt-4">
+                  <Button
+                    onClick={() => openScheduleSheet(course._id)}
+                    className="w-full bg-[#008000] hover:bg-[#006400] text-white"
+                  >
+                    <IconFolderOpen size={16} className="mr-2" />
+                    Add/Edit Schedule
+                  </Button>
                 </div>
               </div>
             </div>
@@ -592,6 +782,277 @@ const ProgramsPage = () => {
               className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 cursor-pointer"
             >
               {isSubmitting ? "Deleting..." : "Delete Program"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Management Sheet */}
+      <Sheet open={isScheduleSheetOpen} onOpenChange={setIsScheduleSheetOpen}>
+        <SheetContent className="w-full sm:max-w-2xl max-h-screen overflow-y-auto ">
+          <SheetHeader>
+            <SheetTitle className="text-2xl font-bold sora">
+              {isScheduleEditing ? "Edit Schedule" : "Manage Schedules"}
+            </SheetTitle>
+            <SheetDescription>
+              {isScheduleEditing
+                ? "Update the schedule details."
+                : "Create and manage course schedules."}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-6 p-6">
+            {/* Schedule Form */}
+            <div className="space-y-4 border-b pb-6">
+              <h3 className="font-semibold text-lg">
+                {isScheduleEditing ? "Edit Schedule" : "Add New Schedule"}
+              </h3>
+
+              <div className="grid gap-2">
+                <label htmlFor="schedule-title" className="text-sm font-medium">
+                  Title *
+                </label>
+                <Input
+                  id="schedule-title"
+                  placeholder="e.g. Introduction to Course"
+                  value={currentSchedule.title || ""}
+                  onChange={(e) =>
+                    setCurrentSchedule({
+                      ...currentSchedule,
+                      title: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <label
+                  htmlFor="schedule-description"
+                  className="text-sm font-medium"
+                >
+                  Description
+                </label>
+                <Textarea
+                  id="schedule-description"
+                  placeholder="Detailed description of this week's session..."
+                  value={currentSchedule.description || ""}
+                  onChange={(e) =>
+                    setCurrentSchedule({
+                      ...currentSchedule,
+                      description: e.target.value,
+                    })
+                  }
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <label
+                    htmlFor="schedule-week"
+                    className="text-sm font-medium"
+                  >
+                    Week *
+                  </label>
+                  <Input
+                    id="schedule-week"
+                    type="number"
+                    placeholder="1"
+                    min="1"
+                    value={currentSchedule.week || ""}
+                    onChange={(e) =>
+                      setCurrentSchedule({
+                        ...currentSchedule,
+                        week: Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <label
+                    htmlFor="schedule-date"
+                    className="text-sm font-medium"
+                  >
+                    Date *
+                  </label>
+                  <Input
+                    id="schedule-date"
+                    type="datetime-local"
+                    value={
+                      currentSchedule.date
+                        ? new Date(currentSchedule.date)
+                            .toISOString()
+                            .slice(0, 16)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setCurrentSchedule({
+                        ...currentSchedule,
+                        date: new Date(e.target.value).toISOString(),
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <label
+                  htmlFor="schedule-facilitator"
+                  className="text-sm font-medium"
+                >
+                  Facilitator *
+                </label>
+                <Input
+                  id="schedule-facilitator"
+                  placeholder="e.g. John Doe"
+                  value={currentSchedule.facilitator || ""}
+                  onChange={(e) =>
+                    setCurrentSchedule({
+                      ...currentSchedule,
+                      facilitator: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                {isScheduleEditing && (
+                  <Button
+                    variant="outline"
+                    onClick={() => resetScheduleForm()}
+                    className="flex-1"
+                  >
+                    Cancel Edit
+                  </Button>
+                )}
+                <Button
+                  onClick={handleCreateOrUpdateSchedule}
+                  disabled={isScheduleSubmitting}
+                  className={`${
+                    isScheduleEditing ? "flex-1" : "w-full"
+                  } bg-[#008000] hover:bg-[#006400] text-white`}
+                >
+                  {isScheduleSubmitting
+                    ? "Saving..."
+                    : isScheduleEditing
+                    ? "Update Schedule"
+                    : "Add Schedule"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Schedules List */}
+            <div>
+              <h3 className="font-semibold text-lg mb-4">
+                All Schedules ({schedules.length})
+              </h3>
+
+              {schedulesLoading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading schedules...
+                </div>
+              ) : schedules.length > 0 ? (
+                <div className="space-y-3">
+                  {schedules.map((schedule) => (
+                    <div
+                      key={schedule._id}
+                      className="border border-border/50 rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex justify-between items-start gap-4 mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">
+                            {schedule.title}
+                          </h4>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            Week {schedule.week} • {schedule.facilitator}
+                          </div>
+                          {schedule.description && (
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                              {schedule.description}
+                            </p>
+                          )}
+                          <div className="text-xs text-muted-foreground mt-2">
+                            {new Date(schedule.date).toLocaleString()}
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary "
+                            onClick={() => openEditSchedule(schedule)}
+                          >
+                            <IconPencil size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() =>
+                              openDeleteScheduleDialog(schedule._id)
+                            }
+                          >
+                            <IconTrash size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground border border-dashed border-border/60 rounded-lg">
+                  No schedules yet. Create one above to get started.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <SheetFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsScheduleSheetOpen(false)}
+            >
+              Close
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      {/* Delete Schedule Confirmation Dialog */}
+      <Dialog
+        open={isScheduleDeleteDialogOpen}
+        onOpenChange={setIsScheduleDeleteDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold sora text-destructive">
+              Delete Schedule
+            </DialogTitle>
+            <DialogDescription className="py-2">
+              Are you sure you want to delete this schedule? This action cannot
+              be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsScheduleDeleteDialogOpen(false);
+                setScheduleIdToDelete(null);
+              }}
+              disabled={isScheduleSubmitting}
+              className="flex-1 sm:flex-none cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteSchedule}
+              disabled={isScheduleSubmitting}
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 cursor-pointer"
+            >
+              {isScheduleSubmitting ? "Deleting..." : "Delete Schedule"}
             </Button>
           </DialogFooter>
         </DialogContent>
