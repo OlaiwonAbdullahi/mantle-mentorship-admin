@@ -36,6 +36,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 interface Course {
@@ -50,6 +51,12 @@ interface Course {
   mode: string;
   benefits: string[];
   isPublished?: boolean;
+}
+
+interface ComingSoonItem {
+  _id: string;
+  title: string;
+  createdAt?: string;
 }
 
 interface Schedule {
@@ -91,6 +98,21 @@ const ProgramsPage = () => {
     null
   );
 
+  // Coming Soon states
+  const [comingSoonItems, setComingSoonItems] = useState<ComingSoonItem[]>([]);
+  const [comingSoonLoading, setComingSoonLoading] = useState(false);
+  const [isComingSoonDialogOpen, setIsComingSoonDialogOpen] = useState(false);
+  const [isComingSoonSubmitting, setIsComingSoonSubmitting] = useState(false);
+  const [currentComingSoon, setCurrentComingSoon] = useState<
+    Partial<ComingSoonItem>
+  >({});
+  const [isComingSoonEditing, setIsComingSoonEditing] = useState(false);
+  const [comingSoonIdToDelete, setComingSoonIdToDelete] = useState<
+    string | null
+  >(null);
+  const [isComingSoonDeleteDialogOpen, setIsComingSoonDeleteDialogOpen] =
+    useState(false);
+
   const fetchCourses = async () => {
     try {
       setLoading(true);
@@ -123,8 +145,33 @@ const ProgramsPage = () => {
     }
   };
 
+  const fetchComingSoon = async () => {
+    try {
+      setComingSoonLoading(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/commingsoon`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        // Assuming the response structure is similar to courses or direct array
+        if (Array.isArray(result)) {
+          setComingSoonItems(result);
+        } else if (result.success && Array.isArray(result.data)) {
+          setComingSoonItems(result.data);
+        } else if (result.data) {
+          setComingSoonItems(result.data);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch coming soon items", error);
+    } finally {
+      setComingSoonLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchCourses();
+    fetchComingSoon();
   }, []);
 
   const handleCreateOrUpdate = async () => {
@@ -340,6 +387,113 @@ const ProgramsPage = () => {
     setIsScheduleEditing(false);
   };
 
+  // Coming Soon Management Functions
+  const handleCreateOrUpdateComingSoon = async () => {
+    if (!currentComingSoon.title?.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+
+    try {
+      setIsComingSoonSubmitting(true);
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        toast.error("Unauthorized. Please login again.");
+        return;
+      }
+
+      const url = isComingSoonEditing
+        ? `${process.env.NEXT_PUBLIC_API_URL}/commingsoon/${currentComingSoon._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/commingsoon`;
+
+      const method = isComingSoonEditing ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title: currentComingSoon.title }),
+      });
+
+      if (response.ok) {
+        await fetchComingSoon();
+        toast.success(
+          `Upcoming program ${
+            isComingSoonEditing ? "updated" : "created"
+          } successfully`
+        );
+        setIsComingSoonDialogOpen(false);
+        resetComingSoonForm();
+      } else {
+        const errorData = await response.json();
+        toast.error(
+          `Failed to ${isComingSoonEditing ? "update" : "create"}: ${
+            errorData.message || "Unknown error"
+          }`
+        );
+      }
+    } catch (error) {
+      console.error("Error saving coming soon item", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsComingSoonSubmitting(false);
+    }
+  };
+
+  const handleDeleteComingSoon = async () => {
+    if (!comingSoonIdToDelete) return;
+
+    try {
+      setIsComingSoonSubmitting(true);
+      const token = localStorage.getItem("admin_token");
+      if (!token) return;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/commingsoon/${comingSoonIdToDelete}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setComingSoonItems((prev) =>
+          prev.filter((c) => c._id !== comingSoonIdToDelete)
+        );
+        toast.success("Upcoming program deleted successfully");
+        setIsComingSoonDeleteDialogOpen(false);
+        setComingSoonIdToDelete(null);
+      } else {
+        toast.error("Failed to delete upcoming program");
+      }
+    } catch (error) {
+      console.error("Error deleting coming soon item", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsComingSoonSubmitting(false);
+    }
+  };
+
+  const resetComingSoonForm = () => {
+    setCurrentComingSoon({});
+    setIsComingSoonEditing(false);
+  };
+
+  const openEditComingSoon = (item: ComingSoonItem) => {
+    setCurrentComingSoon(item);
+    setIsComingSoonEditing(true);
+    setIsComingSoonDialogOpen(true);
+  };
+
+  const openDeleteComingSoonDialog = (id: string) => {
+    setComingSoonIdToDelete(id);
+    setIsComingSoonDeleteDialogOpen(true);
+  };
+
   const openScheduleSheet = (courseId: string) => {
     setSelectedCourseForSchedule(courseId);
     resetScheduleForm();
@@ -400,130 +554,239 @@ const ProgramsPage = () => {
             Manage your mentorship programs, curriculum, and pricing.
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <div className="relative w-full md:w-auto min-w-[250px]">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <IconSearch size={18} />
-            </div>
-            <Input
-              placeholder="Search programs..."
-              className="pl-10 bg-card border-border/60 focus-visible:ring-primary/20"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button
-            className="bg-[#008000] hover:bg-[#006000] text-white"
-            onClick={() => {
-              resetForm();
-              setIsDialogOpen(true);
-            }}
-          >
-            <IconPlus size={18} className="mr-2" />
-            Add Program
-          </Button>
-        </div>
       </div>
 
-      {/* Course List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
-          <div className="col-span-full text-center py-20 text-muted-foreground">
-            Loading programs...
-          </div>
-        ) : filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => (
-            <div
-              key={course._id}
-              className="group relative bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col"
-            >
-              <div className="p-6 flex-1 flex flex-col gap-4">
-                <div className="flex justify-between items-start gap-4">
-                  <Badge
-                    variant={"default"}
-                    className={
-                      "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                    }
-                  >
-                    Published
-                  </Badge>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                      onClick={() => openEditDialog(course)}
-                    >
-                      <IconPencil size={16} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => openDeleteDialog(course._id)}
-                    >
-                      <IconTrash size={16} />
-                    </Button>
-                  </div>
-                </div>
+      <Tabs defaultValue="available" className="w-full space-y-6">
+        <TabsList className="bg-card border border-border/50">
+          <TabsTrigger
+            value="available"
+            className="data-[state=active]:bg-[#008000]/10 data-[state=active]:text-[#008000]"
+          >
+            Programs Available
+          </TabsTrigger>
+          <TabsTrigger
+            value="upcoming"
+            className="data-[state=active]:bg-[#008000]/10 data-[state=active]:text-[#008000]"
+          >
+            Upcoming Programs
+          </TabsTrigger>
+        </TabsList>
 
-                <div>
-                  <h3 className="text-xl font-bold sora text-foreground line-clamp-2 mb-2">
-                    {course.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-nunito line-clamp-3">
-                    {course.description}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-y-2 text-sm mt-2">
-                  <div className="text-muted-foreground">Duration:</div>
-                  <div className="font-medium text-right">
-                    {course.duration}
-                  </div>
-
-                  <div className="text-muted-foreground">Mode:</div>
-                  <div className="font-medium text-right">{course.mode}</div>
-
-                  <div className="text-muted-foreground">Price (NGN):</div>
-                  <div className="font-medium text-right">
-                    ₦{course.price_in_ngn?.toLocaleString()}
-                  </div>
-
-                  <div className="text-muted-foreground">Price (EUR):</div>
-                  <div className="font-medium text-right">
-                    €{course.price_in_euro?.toLocaleString()}
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <Button
-                    onClick={() => openScheduleSheet(course._id)}
-                    className="w-full bg-[#008000] hover:bg-[#006400] text-white"
-                  >
-                    <IconFolderOpen size={16} className="mr-2" />
-                    Add/Edit Schedule
-                  </Button>
-                </div>
+        <TabsContent value="available" className="space-y-6 outline-none">
+          <div className="flex flex-col sm:flex-row gap-3 w-full justify-end">
+            <div className="relative w-full md:w-auto min-w-[250px]">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <IconSearch size={18} />
               </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-20 bg-card/30 rounded-2xl border border-dashed border-border/60">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <IconFolderOpen
-                className="text-muted-foreground opacity-50"
-                size={32}
+              <Input
+                placeholder="Search programs..."
+                className="pl-10 bg-card border-border/60 focus-visible:ring-primary/20"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <h3 className="text-lg font-semibold text-foreground font-sora">
-              No programs found
-            </h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mt-1 font-nunito">
-              Get started by creating a new mentorship program.
-            </p>
+            <Button
+              className="bg-[#008000] hover:bg-[#006000] text-white"
+              onClick={() => {
+                resetForm();
+                setIsDialogOpen(true);
+              }}
+            >
+              <IconPlus size={18} className="mr-2" />
+              Add Program
+            </Button>
           </div>
-        )}
-      </div>
+
+          {/* Course List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              <div className="col-span-full text-center py-20 text-muted-foreground">
+                Loading programs...
+              </div>
+            ) : filteredCourses.length > 0 ? (
+              filteredCourses.map((course) => (
+                <div
+                  key={course._id}
+                  className="group relative bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col"
+                >
+                  <div className="p-6 flex-1 flex flex-col gap-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <Badge
+                        variant={"default"}
+                        className={
+                          "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                        }
+                      >
+                        Published
+                      </Badge>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          onClick={() => openEditDialog(course)}
+                        >
+                          <IconPencil size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => openDeleteDialog(course._id)}
+                        >
+                          <IconTrash size={16} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-bold sora text-foreground line-clamp-2 mb-2">
+                        {course.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground font-nunito line-clamp-3">
+                        {course.description}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-y-2 text-sm mt-2">
+                      <div className="text-muted-foreground">Duration:</div>
+                      <div className="font-medium text-right">
+                        {course.duration}
+                      </div>
+
+                      <div className="text-muted-foreground">Mode:</div>
+                      <div className="font-medium text-right">
+                        {course.mode}
+                      </div>
+
+                      <div className="text-muted-foreground">Price (NGN):</div>
+                      <div className="font-medium text-right">
+                        ₦{course.price_in_ngn?.toLocaleString()}
+                      </div>
+
+                      <div className="text-muted-foreground">Price (EUR):</div>
+                      <div className="font-medium text-right">
+                        €{course.price_in_euro?.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => openScheduleSheet(course._id)}
+                        className="w-full bg-[#008000] hover:bg-[#006400] text-white"
+                      >
+                        <IconFolderOpen size={16} className="mr-2" />
+                        Add/Edit Schedule
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20 bg-card/30 rounded-2xl border border-dashed border-border/60">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconFolderOpen
+                    className="text-muted-foreground opacity-50"
+                    size={32}
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground font-sora">
+                  No programs found
+                </h3>
+                <p className="text-muted-foreground max-w-sm mx-auto mt-1 font-nunito">
+                  We couldn&apos;t find any programs matching your search. Try
+                  adjusting your search terms.
+                </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="upcoming" className="space-y-6 outline-none">
+          <div className="flex justify-end">
+            <Button
+              className="bg-[#008000] hover:bg-[#006000] text-white"
+              onClick={() => {
+                resetComingSoonForm();
+                setIsComingSoonDialogOpen(true);
+              }}
+            >
+              <IconPlus size={18} className="mr-2" />
+              Add Upcoming Program
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {comingSoonLoading ? (
+              <div className="col-span-full text-center py-20 text-muted-foreground">
+                Loading upcoming programs...
+              </div>
+            ) : comingSoonItems.length > 0 ? (
+              comingSoonItems.map((item) => (
+                <div
+                  key={item._id}
+                  className="group relative bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col"
+                >
+                  <div className="p-6 flex-1 flex flex-col gap-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <Badge
+                        variant={"secondary"}
+                        className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
+                      >
+                        Coming Soon
+                      </Badge>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          onClick={() => openEditComingSoon(item)}
+                        >
+                          <IconPencil size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => openDeleteComingSoonDialog(item._id)}
+                        >
+                          <IconTrash size={16} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-bold sora text-foreground line-clamp-2">
+                        {item.title}
+                      </h3>
+                      {item.createdAt && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Added on{" "}
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20 bg-card/30 rounded-2xl border border-dashed border-border/60">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconFolderOpen
+                    className="text-muted-foreground opacity-50"
+                    size={32}
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground font-sora">
+                  No upcoming programs
+                </h3>
+                <p className="text-muted-foreground max-w-sm mx-auto mt-1 font-nunito">
+                  Add programs that are launching soon to build anticipation.
+                </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -1053,6 +1316,104 @@ const ProgramsPage = () => {
               className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 cursor-pointer"
             >
               {isScheduleSubmitting ? "Deleting..." : "Delete Schedule"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Coming Soon Create/Edit Dialog */}
+      <Dialog
+        open={isComingSoonDialogOpen}
+        onOpenChange={setIsComingSoonDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold sora">
+              {isComingSoonEditing
+                ? "Edit Upcoming Program"
+                : "Add Upcoming Program"}
+            </DialogTitle>
+            <DialogDescription>
+              {isComingSoonEditing
+                ? "Update the title of this upcoming program."
+                : "Add a title for a program that will be available soon."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="cs-title" className="text-sm font-medium">
+                Program Title
+              </label>
+              <Input
+                id="cs-title"
+                placeholder="e.g. Advanced AI Course"
+                value={currentComingSoon.title || ""}
+                onChange={(e) =>
+                  setCurrentComingSoon({
+                    ...currentComingSoon,
+                    title: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsComingSoonDialogOpen(false)}
+              disabled={isComingSoonSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateOrUpdateComingSoon}
+              disabled={isComingSoonSubmitting}
+              className="bg-[#008000] hover:bg-[#006000] text-white"
+            >
+              {isComingSoonSubmitting
+                ? "Saving..."
+                : isComingSoonEditing
+                ? "Update"
+                : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Coming Soon Delete Confirmation Dialog */}
+      <Dialog
+        open={isComingSoonDeleteDialogOpen}
+        onOpenChange={setIsComingSoonDeleteDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold sora text-destructive">
+              Delete Upcoming Program
+            </DialogTitle>
+            <DialogDescription className="py-2">
+              Are you sure you want to delete this upcoming program? This action
+              cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsComingSoonDeleteDialogOpen(false);
+                setComingSoonIdToDelete(null);
+              }}
+              disabled={isComingSoonSubmitting}
+              className="flex-1 sm:flex-none cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteComingSoon}
+              disabled={isComingSoonSubmitting}
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 cursor-pointer"
+            >
+              {isComingSoonSubmitting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
