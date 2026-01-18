@@ -56,6 +56,7 @@ interface Course {
 interface ComingSoonItem {
   _id: string;
   title: string;
+  subtitle?: string[];
   createdAt?: string;
 }
 
@@ -112,6 +113,7 @@ const ProgramsPage = () => {
   >(null);
   const [isComingSoonDeleteDialogOpen, setIsComingSoonDeleteDialogOpen] =
     useState(false);
+  const [newSubtitle, setNewSubtitle] = useState("");
 
   const fetchCourses = async () => {
     try {
@@ -414,7 +416,10 @@ const ProgramsPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title: currentComingSoon.title }),
+        body: JSON.stringify({
+          title: currentComingSoon.title,
+          subtitle: currentComingSoon.subtitle || [],
+        }),
       });
 
       if (response.ok) {
@@ -479,8 +484,25 @@ const ProgramsPage = () => {
   };
 
   const resetComingSoonForm = () => {
-    setCurrentComingSoon({});
+    setCurrentComingSoon({ subtitle: [] });
     setIsComingSoonEditing(false);
+    setNewSubtitle("");
+  };
+
+  const addSubtitle = () => {
+    if (!newSubtitle.trim()) return;
+    setCurrentComingSoon((prev) => ({
+      ...prev,
+      subtitle: [...(prev.subtitle || []), newSubtitle.trim()],
+    }));
+    setNewSubtitle("");
+  };
+
+  const removeSubtitle = (index: number) => {
+    setCurrentComingSoon((prev) => ({
+      ...prev,
+      subtitle: prev.subtitle?.filter((_, i) => i !== index),
+    }));
   };
 
   const openEditComingSoon = (item: ComingSoonItem) => {
@@ -758,6 +780,22 @@ const ProgramsPage = () => {
                       <h3 className="text-xl font-bold sora text-foreground line-clamp-2">
                         {item.title}
                       </h3>
+                      {item.subtitle && item.subtitle.length > 0 && (
+                        <div
+                          className="flex flex-row flex-wrap gap-2.5
+                        "
+                        >
+                          {item.subtitle.map((sub, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs text-muted-foreground"
+                            >
+                              {sub}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       {item.createdAt && (
                         <p className="text-xs text-muted-foreground mt-2">
                           Added on{" "}
@@ -1355,6 +1393,47 @@ const ProgramsPage = () => {
                   })
                 }
               />
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Subtitles</label>
+              <div className="space-y-3">
+                {currentComingSoon.subtitle &&
+                  currentComingSoon.subtitle.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {currentComingSoon.subtitle.map((subtitle, index) => (
+                        <div
+                          key={index}
+                          className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                        >
+                          <span>{subtitle}</span>
+                          <button
+                            onClick={() => removeSubtitle(index)}
+                            className="hover:text-destructive"
+                          >
+                            <IconX size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add a subtitle (e.g. Beginner Friendly)"
+                    value={newSubtitle}
+                    onChange={(e) => setNewSubtitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addSubtitle();
+                      }
+                    }}
+                  />
+                  <Button type="button" onClick={addSubtitle} variant="outline">
+                    Add
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
           <DialogFooter>
