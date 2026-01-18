@@ -96,7 +96,7 @@ const ProgramsPage = () => {
   const [isScheduleDeleteDialogOpen, setIsScheduleDeleteDialogOpen] =
     useState(false);
   const [scheduleIdToDelete, setScheduleIdToDelete] = useState<string | null>(
-    null
+    null,
   );
 
   // Coming Soon states
@@ -127,7 +127,7 @@ const ProgramsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -151,7 +151,7 @@ const ProgramsPage = () => {
     try {
       setComingSoonLoading(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/commingsoon`
+        `${process.env.NEXT_PUBLIC_API_URL}/commingsoon`,
       );
       if (response.ok) {
         const result = await response.json();
@@ -207,7 +207,7 @@ const ProgramsPage = () => {
         toast.error(
           `Failed to ${isEditing ? "update" : "create"} course: ${
             errorData.message || "Unknown error"
-          }`
+          }`,
         );
       }
     } catch (error) {
@@ -233,7 +233,7 @@ const ProgramsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -271,7 +271,7 @@ const ProgramsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -331,7 +331,7 @@ const ProgramsPage = () => {
       if (response.ok) {
         await fetchSchedules(selectedCourseForSchedule);
         toast.success(
-          `Schedule ${isScheduleEditing ? "updated" : "created"} successfully`
+          `Schedule ${isScheduleEditing ? "updated" : "created"} successfully`,
         );
         resetScheduleForm();
       } else {
@@ -339,7 +339,7 @@ const ProgramsPage = () => {
         toast.error(
           `Failed to ${isScheduleEditing ? "update" : "create"} schedule: ${
             errorData.message || "Unknown error"
-          }`
+          }`,
         );
       }
     } catch (error) {
@@ -365,7 +365,7 @@ const ProgramsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -427,7 +427,7 @@ const ProgramsPage = () => {
         toast.success(
           `Upcoming program ${
             isComingSoonEditing ? "updated" : "created"
-          } successfully`
+          } successfully`,
         );
         setIsComingSoonDialogOpen(false);
         resetComingSoonForm();
@@ -436,7 +436,7 @@ const ProgramsPage = () => {
         toast.error(
           `Failed to ${isComingSoonEditing ? "update" : "create"}: ${
             errorData.message || "Unknown error"
-          }`
+          }`,
         );
       }
     } catch (error) {
@@ -462,12 +462,12 @@ const ProgramsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
         setComingSoonItems((prev) =>
-          prev.filter((c) => c._id !== comingSoonIdToDelete)
+          prev.filter((c) => c._id !== comingSoonIdToDelete),
         );
         toast.success("Upcoming program deleted successfully");
         setIsComingSoonDeleteDialogOpen(false);
@@ -561,7 +561,7 @@ const ProgramsPage = () => {
   };
 
   const filteredCourses = courses.filter((c) =>
-    c.title.toLowerCase().includes(searchTerm.toLowerCase())
+    c.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -582,13 +582,13 @@ const ProgramsPage = () => {
         <TabsList className="bg-card border border-border/50">
           <TabsTrigger
             value="available"
-            className="data-[state=active]:bg-[#008000]/10 data-[state=active]:text-[#008000]"
+            className="data-[state=active]:bg-[#A020F0]/10 data-[state=active]:text-[#A020F0]"
           >
             Programs Available
           </TabsTrigger>
           <TabsTrigger
             value="upcoming"
-            className="data-[state=active]:bg-[#008000]/10 data-[state=active]:text-[#008000]"
+            className="data-[state=active]:bg-[#A020F0]/10 data-[state=active]:text-[#A020F0]"
           >
             Upcoming Programs
           </TabsTrigger>
@@ -608,7 +608,7 @@ const ProgramsPage = () => {
               />
             </div>
             <Button
-              className="bg-[#008000] hover:bg-[#006000] text-white"
+              className="bg-[#A020F0] hover:bg-[#006000] text-white"
               onClick={() => {
                 resetForm();
                 setIsDialogOpen(true);
@@ -694,7 +694,7 @@ const ProgramsPage = () => {
                     <div className="mt-4">
                       <Button
                         onClick={() => openScheduleSheet(course._id)}
-                        className="w-full bg-[#008000] hover:bg-[#006400] text-white"
+                        className="w-full bg-[#A020F0] hover:bg-[#006400] text-white"
                       >
                         <IconFolderOpen size={16} className="mr-2" />
                         Add/Edit Schedule
@@ -726,7 +726,7 @@ const ProgramsPage = () => {
         <TabsContent value="upcoming" className="space-y-6 outline-none">
           <div className="flex justify-end">
             <Button
-              className="bg-[#008000] hover:bg-[#006000] text-white"
+              className="bg-[#A020F0] hover:bg-[##A020F0]/90 text-white"
               onClick={() => {
                 resetComingSoonForm();
                 setIsComingSoonDialogOpen(true);
@@ -1040,13 +1040,13 @@ const ProgramsPage = () => {
             <Button
               onClick={handleCreateOrUpdate}
               disabled={isSubmitting}
-              className="bg-[#008000] hover:bg-[#006000] text-white"
+              className="bg-[#A020F0] hover:bg-[#006000] text-white"
             >
               {isSubmitting
                 ? "Saving..."
                 : isEditing
-                ? "Update Program"
-                : "Create Program"}
+                  ? "Update Program"
+                  : "Create Program"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1232,13 +1232,13 @@ const ProgramsPage = () => {
                   disabled={isScheduleSubmitting}
                   className={`${
                     isScheduleEditing ? "flex-1" : "w-full"
-                  } bg-[#008000] hover:bg-[#006400] text-white`}
+                  } bg-[#A020F0] hover:bg-[#006400] text-white`}
                 >
                   {isScheduleSubmitting
                     ? "Saving..."
                     : isScheduleEditing
-                    ? "Update Schedule"
-                    : "Add Schedule"}
+                      ? "Update Schedule"
+                      : "Add Schedule"}
                 </Button>
               </div>
             </div>
@@ -1447,13 +1447,13 @@ const ProgramsPage = () => {
             <Button
               onClick={handleCreateOrUpdateComingSoon}
               disabled={isComingSoonSubmitting}
-              className="bg-[#008000] hover:bg-[#006000] text-white"
+              className="bg-[#A020F0] hover:bg-[#006000] text-white"
             >
               {isComingSoonSubmitting
                 ? "Saving..."
                 : isComingSoonEditing
-                ? "Update"
-                : "Create"}
+                  ? "Update"
+                  : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>

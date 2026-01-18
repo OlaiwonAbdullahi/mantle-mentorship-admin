@@ -12,7 +12,7 @@ interface NavbarProps {
 }
 const Navbar = ({ userName = "John" }: NavbarProps) => {
   const [data, setData] = useState<{ name: string; email: string } | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const Navbar = ({ userName = "John" }: NavbarProps) => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (response.ok) {
@@ -49,7 +49,7 @@ const Navbar = ({ userName = "John" }: NavbarProps) => {
   }, []);
 
   return (
-    <nav className="bg-[#008000] border-b border-neutral-700 z-20 px-6 py-5 sticky top-0 ">
+    <nav className="bg-[#A020F0] border-b border-neutral-700 z-20 px-6 py-5 sticky top-0 ">
       <div className="flex items-center justify-between gap-6">
         <div className=" flex md:hidden items-center gap-2 justify-between w-full">
           <Image src="/mantleLogo.png" alt="logo" width={50} height={50} />

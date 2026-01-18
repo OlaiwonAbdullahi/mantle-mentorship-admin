@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className=" flex items-center md:hidden">
           <div className="absolute top-4 left-4 z-20">
             {" "}
-            <div className="bg-[#008000] w-fit rounded-full p-1.5 flex items-center justify-center">
+            <div className="bg-[#A020F0] w-fit rounded-full p-1.5 flex items-center justify-center">
               <Image
                 src="/mantleLogo.png"
                 alt="Logo"
@@ -23,9 +23,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="absolute top-4 right-4 z-20">
-            <div className=" rounded-full border w-fit border-[#008000] p-2">
+            <div className=" rounded-full border w-fit border-[#A020F0] p-2">
               <SidebarTrigger
-                className="lg:hidden p-2 hover:bg-emerald-500/10 cursor-pointer rounded-md text-[#008000]  hover:text-emerald-500  transition-all"
+                className="lg:hidden p-2 hover:bg-emerald-500/10 cursor-pointer rounded-md text-[#A020F0]  hover:text-emerald-500  transition-all"
                 size={"lg"}
               />
             </div>

@@ -67,7 +67,7 @@ const AdminSidebar = () => {
   };
 
   const [data, setData] = useState<{ name: string; email: string } | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const AdminSidebar = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (response.ok) {
@@ -114,24 +114,14 @@ const AdminSidebar = () => {
     <Sidebar className="border-r border-neutral-200 dark:border-neutral-800">
       <SidebarContent className="flex flex-col h-full bg-white dark:bg-neutral-950">
         <SidebarGroup className="px-0">
-          <SidebarHeader className="flex border-b border-neutral-100 flex-row space-x-3 items-center px-4 py-6">
-            <div className="bg-[#008000] rounded-full p-1.5 flex items-center justify-center">
-              <Image
-                src="/mantleLogo.png"
-                alt="Logo"
-                width={32}
-                height={32}
-                className="w-8 h-8 object-contain bg-white rounded-full p-0.5"
-              />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-neutral-900 dark:text-neutral-100 font-bold sora tracking-tight leading-tight">
-                Mantle
-              </p>
-              <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-widest">
-                Mentorship Admin
-              </p>
-            </div>
+          <SidebarHeader className="flex border-b border-neutral-100 flex-col space-y-1 ">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={80}
+              height={80}
+              className="w-full h-[80px] p-2  object-contain bg-white"
+            />
           </SidebarHeader>
 
           {/* Menu Items */}
@@ -146,8 +136,8 @@ const AdminSidebar = () => {
                       className={cn(
                         "group/item transition-all duration-200 rounded-lg px-3 py-3 h-auto",
                         active
-                          ? "bg-[#008000] text-white hover:bg-[#006000] hover:text-white"
-                          : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                          ? "bg-[#A020F0] text-white hover:bg-[#A020F0]/90 hover:text-white"
+                          : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900",
                       )}
                       tooltip={item.title}
                     >
@@ -157,7 +147,7 @@ const AdminSidebar = () => {
                             "w-5 h-5 shrink-0 transition-transform duration-200 group-hover/item:scale-110",
                             active
                               ? "text-white"
-                              : "text-neutral-500 dark:text-neutral-400"
+                              : "text-neutral-500 dark:text-neutral-400",
                           )}
                           stroke={1.5}
                         />

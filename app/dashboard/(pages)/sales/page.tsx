@@ -97,7 +97,7 @@ const SalesPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -131,7 +131,7 @@ const SalesPage = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ status: newStatus }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -163,7 +163,7 @@ const SalesPage = () => {
     (e) =>
       e.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.course.title.toLowerCase().includes(searchTerm.toLowerCase())
+      e.course.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getStatusBadge = (status: string) => {
@@ -509,7 +509,7 @@ const SalesPage = () => {
                 )}
                 {selectedEnrollment.status === "pending" && (
                   <Button
-                    className="flex-1 bg-[#008000] hover:bg-[#006000] text-white"
+                    className="flex-1 bg-[#A020F0] hover:bg-[#006000] text-white"
                     onClick={() =>
                       handleUpdateStatus(selectedEnrollment._id, "paid")
                     }

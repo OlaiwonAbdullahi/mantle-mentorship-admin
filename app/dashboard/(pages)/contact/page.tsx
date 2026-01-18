@@ -43,7 +43,7 @@ const ContactPage = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (response.ok) {
@@ -68,7 +68,7 @@ const ContactPage = () => {
   const filteredMessages = messages.filter(
     (msg) =>
       msg.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      msg.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      msg.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const formatDate = (dateString: string) => {
@@ -79,7 +79,7 @@ const ContactPage = () => {
     if (diffInHours < 24) {
       if (diffInHours < 1) {
         const diffInMinutes = Math.floor(
-          Math.abs(now.getTime() - date.getTime()) / 60000
+          Math.abs(now.getTime() - date.getTime()) / 60000,
         );
         return `${diffInMinutes} mins ago`;
       }
@@ -130,7 +130,7 @@ const ContactPage = () => {
               key={msg._id}
               className={`group relative transition-all duration-300 border rounded-xl p-5 shadow-sm hover:shadow-md flex flex-col md:flex-row gap-5 items-start md:items-center ${
                 !msg.isRead
-                  ? "bg-card border-l-4 border-l-[#008000] shadow-md"
+                  ? "bg-card border-l-4 border-l-[#A020F0] shadow-md"
                   : "bg-card/50 hover:bg-card border-border/50 opacity-80 hover:opacity-100"
               }`}
             >
@@ -244,7 +244,7 @@ const ContactPage = () => {
                                   headers: {
                                     Authorization: `Bearer ${token}`,
                                   },
-                                }
+                                },
                               );
 
                               if (response.ok) {
@@ -253,8 +253,8 @@ const ContactPage = () => {
                                   prev.map((m) =>
                                     m._id === msg._id
                                       ? { ...m, isRead: true }
-                                      : m
-                                  )
+                                      : m,
+                                  ),
                                 );
                               } else {
                                 toast.error("Failed to mark message as read");
@@ -262,7 +262,7 @@ const ContactPage = () => {
                             } catch (error) {
                               console.error(
                                 "Error marking message as read",
-                                error
+                                error,
                               );
                               toast.error("Something went wrong");
                             }
@@ -291,12 +291,12 @@ const ContactPage = () => {
                           headers: {
                             Authorization: `Bearer ${token}`,
                           },
-                        }
+                        },
                       );
 
                       if (response.ok) {
                         setMessages((prev) =>
-                          prev.filter((m) => m._id !== msg._id)
+                          prev.filter((m) => m._id !== msg._id),
                         );
                         toast.success("Message deleted");
                       } else {

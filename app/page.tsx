@@ -30,7 +30,7 @@ export default function LoginPage() {
             email: email,
             password: password,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -49,7 +49,7 @@ export default function LoginPage() {
         router.push("/dashboard");
       } else {
         toast.error(
-          data.message || "Login failed. Please check your credentials."
+          data.message || "Login failed. Please check your credentials.",
         );
       }
     } catch (error) {
@@ -62,7 +62,7 @@ export default function LoginPage() {
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="hidden bg-[#008000] lg:flex flex-col justify-between p-10 text-white dark:border-r">
+      <div className="hidden bg-[#A020F0] lg:flex flex-col justify-between p-10 text-white dark:border-r">
         <div className="flex items-center gap-2 font-medium text-xl sora">
           <div className="bg-white rounded-full p-1 flex items-center justify-center">
             <Image
@@ -93,7 +93,7 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-[400px] space-y-8">
           <div className="flex flex-col items-center gap-2 text-center">
             {/* Show logo on mobile only since it's hidden in the side panel */}
-            <div className="lg:hidden bg-[#008000] rounded-full p-2 mb-2">
+            <div className="lg:hidden bg-[#A020F0] rounded-full p-2 mb-2">
               <Image
                 src="/mantleLogo.png"
                 alt="Logo"
@@ -130,7 +130,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
-                    className="h-11 border-neutral-200 dark:border-neutral-800 focus-visible:ring-[#008000]"
+                    className="h-11 border-neutral-200 dark:border-neutral-800 focus-visible:ring-[#A020F0]"
                     required
                   />
                 </div>
@@ -150,13 +150,13 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
                     disabled={isLoading}
-                    className="h-11 border-neutral-200 dark:border-neutral-800 focus-visible:ring-[#008000]"
+                    className="h-11 border-neutral-200 dark:border-neutral-800 focus-visible:ring-[#A020F0]"
                     required
                   />
                 </div>
                 <Button
                   disabled={isLoading}
-                  className="h-11 bg-[#008000] hover:bg-[#006000] text-white shadow-sm transition-all"
+                  className="h-11 bg-[#A020F0] hover:bg-[#006000] text-white shadow-sm transition-all"
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
